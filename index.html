@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista bebé — San Diego</title>
+<style>
+  :root {
+    --cream: #FAF7F2;
+    --sand: #EDE8DF;
+    --terracotta: #C4714A;
+    --terracotta-light: #F2E4DA;
+    --sage: #7A9E87;
+    --sage-light: #E4EEE7;
+    --slate: #4A5568;
+    --dark: #2D2A26;
+    --muted: #9A9488;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+    padding-bottom: 4rem;
+  }
+  header {
+    background: var(--dark);
+    color: var(--cream);
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+  }
+  header h1 {
+    font-size: clamp(1.7rem, 5vw, 2.5rem);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.3rem;
+  }
+  header p {
+    font-size: 0.75rem;
+    color: #9A9488;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .progress-wrap {
+    background: #3A3630;
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: #555048;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--sage);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-size: 0.78rem;
+    color: #9A9488;
+    white-space: nowrap;
+  }
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.9rem 1.2rem;
+    overflow-x: auto;
+    background: var(--sand);
+    border-bottom: 1px solid #D9D2C5;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.45rem 1.1rem;
+    border-radius: 99px;
+    border: 1.5px solid #C8C0B4;
+    background: transparent;
+    color: var(--slate);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .filter-btn.active {
+    background: var(--dark);
+    color: var(--cream);
+    border-color: var(--dark);
+  }
+  .legend {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding: 0.9rem 1.5rem 0;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .content { padding: 1.2rem; max-width: 680px; margin: 0 auto; }
+  .category { margin-bottom: 1.8rem; }
+  .cat-title {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .cat-count { font-weight: 400; font-size: 0.65rem; color: #C0B8AE; }
+  .cat-line { flex: 1; height: 1px; background: var(--sand); }
+  .items { display: flex; flex-direction: column; gap: 0.4rem; }
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 0.9rem;
+    background: white;
+    border: 1px solid #EDE8DF;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .item:active { opacity: 0.7; }
+  .item.done { opacity: 0.38; }
+  .item.done .item-name { text-decoration: line-through; }
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid #C8C0B4;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .checkbox.checked { background: var(--sage); border-color: var(--sage); }
+  .checkmark { color: white; font-size: 12px; line-height: 1; }
+  .item-body { flex: 1; min-width: 0; }
+  .item-name { font-size: 0.9rem; line-height: 1.4; color: var(--dark); }
+  .item-note { font-size: 0.76rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.4; }
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 99px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .p-must { background: var(--terracotta-light); color: var(--terracotta); }
+  .p-rec  { background: var(--sage-light); color: #4A7A5A; }
+  .p-opt  { background: var(--sand); color: var(--muted); }
+  .reset-btn {
+    display: block;
+    margin: 2rem auto 0;
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #D9D2C5;
+    padding: 0.55rem 1.5rem;
+    border-radius: 99px;
+    cursor: pointer;
+  }
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Lista del primer bebé</h1>
+  <p>Shopping · San Diego</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="progress-label" id="progress-label">0 comprados</div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all',this)">Todo</button>
+  <button class="filter-btn" onclick="setFilter('must',this)">Esencial</button>
+  <button class="filter-btn" onclick="setFilter('rec',this)">Recomendado</button>
+  <button class="filter-btn" onclick="setFilter('opt',this)">Opcional</button>
+  <button class="filter-btn" onclick="setFilter('pending',this)">Sin comprar</button>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#C4714A"></div>Esencial</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7A9E87"></div>Recomendado</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#C8C0B4"></div>Opcional</div>
+</div>
+
+<div class="content">
+  <div id="list"></div>
+  <button class="reset-btn" onclick="resetAll()">Reiniciar todo</button>
+</div>
+
+<script>
+var data = [
+  { cat: "Dormir", items: [
+    { name: "Cuna", note: "Esencial desde el primer día", p: "must" },
+    { name: "Moisés o colecho", note: "Ideal para tener cerca al bebé los primeros meses", p: "must" },
+    { name: "Colchón de cuna memory foam", note: "Amazon tiene buenas opciones — que sea firme y del tamaño exacto de la cuna", p: "must" },
+    { name: "Sábanas ajustables para cuna (x3)", note: "100% algodón", p: "must" },
+    { name: "Saquito de dormir / sleep sack (x2)", note: "Más seguro que el swaddle pasados los primeros meses", p: "must" },
+    { name: "Mantitas de muselina (x5)", note: "Súper versátiles — cobija ligera, sombra en carriola, tapete improvisado y más", p: "must" },
+    { name: "Móvil para cuna", note: "Hace la diferencia cuando se pasa al bebé a la cuna", p: "rec" },
+    { name: "Monitor de bebé", note: "Con cámara o solo audio — hay modelos que ya incluyen ruido blanco integrado", p: "rec" },
+    { name: "Máquina de ruido blanco", note: "Solo necesaria si el monitor que elijas no trae sonido incorporado", p: "opt" }
+  ]},
+  { cat: "Alimentación — bebé", items: [
+    { name: "Biberones Pigeon (x6)", note: "Tetina de flujo lento para recién nacido", p: "must" },
+    { name: "Cepillo para lavar biberones", p: "must" },
+    { name: "Escurridor / rack para biberones", note: "Muy útil si no se compra esterilizador con secado — Boon Grass en Target", p: "rec" },
+    { name: "Esterilizador de biberones", note: "Eléctrico o para microondas", p: "rec" },
+    { name: "Baberos de silicón (x3)", note: "En Amazon hay kits con babero, vaso, plato con ventosas y cubiertos", p: "must" },
+    { name: "Chupones (x2-3)", note: "Bibs (brillan en la noche), Nuuk y Philips Avent son muy buenos", p: "rec" },
+    { name: "Sujetadores de chupón (x2)", note: "Para no perderlos — de clip con cinta o de silicón", p: "rec" },
+    { name: "Silla de comer / high chair", note: "Puede esperar hasta los 6 meses", p: "opt" }
+  ]},
+  { cat: "Lactancia", items: [
+    { name: "Extractor de leche", note: "Puede estar cubierto por seguro médico o en Target", p: "must" },
+    { name: "Bolsas para leche materna (x50)", note: "Medela o Lansinoh", p: "rec" },
+    { name: "Almohadillas de lactancia de bambú", note: "En Amazon o Target — lavables y más suaves", p: "rec" },
+    { name: "Toallitas de cara / washcloths blancos (x8-10)", note: "Para limpiar al bebé durante y después de lactar — los blancos se pueden blanquear", p: "must" },
+    { name: "Tiras para medir alcohol en leche materna", note: "Para verificar antes de amamantar después de una copa — búscalas en Amazon", p: "rec" }
+  ]},
+  { cat: "Ropa del bebé", items: [
+    { name: "Pañaleros manga corta (x4)", note: "Prioriza tallas 3-6M, 6-12M o 12-18M — la ropa RN se usa muy poco", p: "must" },
+    { name: "Pañaleros manga larga (x4)", note: "Igual, mejor invertir en tallas más grandes", p: "must" },
+    { name: "Pijamas cómodas de algodón (x4)", note: "Fácil de abrochar y desabrochar — con cierre o snaps, sin cordones", p: "must" },
+    { name: "Conjuntos aguados y cómodos (x3-4)", note: "Para el día a día, que sean suaves y holgados", p: "must" },
+    { name: "Calcetines (x8 pares)", p: "must" },
+    { name: "Gorrito para recién nacido (x2)", p: "must" },
+    { name: "Chamarra o saco para salir", note: "Según temporada", p: "rec" }
+  ]},
+  { cat: "Ropa y accesorios mamá", items: [
+    { name: "Bras de lactancia (x4)", note: "2 beige + 2 negros — básicos que se usan todo el tiempo", p: "must" },
+    { name: "Pantalones de maternidad (x2-3)", note: "Con banda elástica alta, muy cómodos también postparto", p: "must" }
+  ]},
+  { cat: "Pañalera y cambios", items: [
+    { name: "Pañalera con cambiador y varias bolsas", note: "Que incluya cambiador portátil y compartimentos — Skip Hop y Freshly Picked tienen buenas opciones", p: "must" }
+  ]},
+  { cat: "Baño e higiene", items: [
+    { name: "Bañera para bebé", note: "Fisher-Price o Frida Baby", p: "must" },
+    { name: "Termómetro rectal", note: "Generalmente lo dan en el hospital — verificar antes de comprar", p: "rec" },
+    { name: "Kit de primeros auxilios para bebé", p: "must" },
+    { name: "Toallas de baño con capucha (x2)", p: "must" },
+    { name: "Cortauñas o lima para bebé", p: "must" }
+  ]},
+  { cat: "Traslado y movilidad", items: [
+    { name: "Asiento de auto (infant car seat)", note: "Esencial. Hay desde recién nacido (infant) y convertibles para más adelante — no urge la convertible ahorita", p: "must" },
+    { name: "Carriola / stroller", note: "UPPAbaby, Chicco o Graco — revisar en tienda si tiene portavaso o comprarlo aparte", p: "must" },
+    { name: "Adaptador de vaso / portatermos para carriola", note: "Muy práctico para salidas largas — verificar compatibilidad con el modelo en tienda", p: "rec" },
+    { name: "Baby carrier Ergobaby", note: "También hay opción de tela wrap — preguntar a quien ya tenga una", p: "rec" }
+  ]},
+  { cat: "Salud", items: [
+    { name: "Humidificador de cool mist", note: "Ayuda en noches de congestión", p: "rec" },
+    { name: "Vitamina D en gotas para bebé", note: "El pediatra la receta generalmente", p: "rec" },
+    { name: "Tapas para enchufes y seguros para cajones", note: "Para cuando empiece a gatear — no urgente", p: "opt" }
+  ]},
+  { cat: "Comodidad del bebé", items: [
+    { name: "Bouncer", note: "Fisher-Price o Mamaroo", p: "rec" },
+    { name: "Columpio para bebé", note: "Graco o 4moms", p: "opt" },
+    { name: "Play mat / tapete de juegos", note: "Para cuando empiece a despertar más", p: "rec" }
+  ]}
+];
+
+var STORAGE_KEY = 'lista_bebe_v2';
+var checked = {};
+try { checked = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+var currentFilter = 'all';
+
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(checked)); } catch(e) {} }
+
+function buildList() {
+  var list = document.getElementById('list');
+  list.innerHTML = '';
+  var total = 0, done = 0;
+  data.forEach(function(cat) {
+    total += cat.items.length;
+    cat.items.forEach(function(item) { if (checked[item.name]) done++; });
+  });
+
+  var anyVisible = false;
+  data.forEach(function(cat) {
+    var filtered = cat.items.filter(function(item) {
+      if (currentFilter === 'must') return item.p === 'must';
+      if (currentFilter === 'rec') return item.p === 'rec';
+      if (currentFilter === 'opt') return item.p === 'opt';
+      if (currentFilter === 'pending') return !checked[item.name];
+      return true;
+    });
+    if (!filtered.length) return;
+    anyVisible = true;
+    var doneCount = filtered.filter(function(i) { return checked[i.name]; }).length;
+
+    var catDiv = document.createElement('div');
+    catDiv.className = 'category';
+
+    var titleDiv = document.createElement('div');
+    titleDiv.className = 'cat-title';
+    titleDiv.innerHTML = cat.cat + ' <span class="cat-count">' + doneCount + '/' + filtered.length + '</span><div class="cat-line"></div>';
+    catDiv.appendChild(titleDiv);
+
+    var itemsDiv = document.createElement('div');
+    itemsDiv.className = 'items';
+
+    filtered.forEach(function(item) {
+      var el = document.createElement('div');
+      el.className = 'item' + (checked[item.name] ? ' done' : '');
+      var pLabel = item.p === 'must' ? 'Esencial' : item.p === 'rec' ? 'Recomendado' : 'Opcional';
+      el.innerHTML =
+        '<div class="checkbox ' + (checked[item.name] ? 'checked' : '') + '">' +
+          (checked[item.name] ? '<span class="checkmark">✓</span>' : '') +
+        '</div>' +
+        '<div class="item-body">' +
+          '<div class="item-name">' + item.name + '</div>' +
+          (item.note ? '<div class="item-note">' + item.note + '</div>' : '') +
+        '</div>' +
+        '<span class="badge p-' + item.p + '">' + pLabel + '</span>';
+      (function(n) {
+        el.onclick = function() { checked[n] = !checked[n]; save(); buildList(); };
+      })(item.name);
+      itemsDiv.appendChild(el);
+    });
+
+    catDiv.appendChild(itemsDiv);
+    list.appendChild(catDiv);
+  });
+
+  if (!anyVisible) {
+    list.innerHTML = '<div class="empty">¡Todo comprado en este filtro! 🎉</div>';
+  }
+
+  var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = done + ' de ' + total + ' comprados';
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  var btns = document.querySelectorAll('.filter-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  buildList();
+}
+
+function resetAll() {
+  if (confirm('¿Reiniciar toda la lista?')) { checked = {}; save(); buildList(); }
+}
+
+buildList();
+</script>
+</body>
+</html>
